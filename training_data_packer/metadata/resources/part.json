@@ -7,13 +7,24 @@
   "properties": {
     "input": {
       "type": "string",
-      "description": "Where to read input data from."
+      "description": "Where to read input data from.",
+      "minLength": 1
     },
     "annotations": {
       "type": "array",
       "descriptions": "Overlay datasets to use",
       "items": {
-        "enum": ["nemo-curator", "openai-privacy-filter", "propella-4b"]
+        "enum": [
+          "nemo-curator",
+          "openai-privacy-filter",
+          "propella-4b",
+          "doc_scores",
+          "web-register",
+          "bsc-edu",
+          "finepdfs-edu",
+          "fineweb2-hq",
+          "jql"
+        ]
       }
     },
     "mask": {
@@ -45,27 +56,61 @@
     "pack": {
       "type": "string",
       "description": "Method for structure out data",
-      "enum": ["flat", "tree"]
+      "enum": [
+        "flat",
+        "tree"
+      ]
     },
     "scrub": {
       "type": "array",
       "description": "Fields to remove from dataset",
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       }
     },
     "sample": {
       "type": "string",
       "description": "Sampling method of documents",
-      "enum": ["full", "dynamic", "random", "wds+register"]
+      "enum": [
+        "full",
+        "dynamic",
+        "random",
+        "wds+register"
+      ]
     },
     "filter": {
       "type": "string",
-      "description": "Relative path to filter code"
+      "description": "Relative path to filter code",
+      "minLength": 1
     },
     "parameters": {
       "type": "object",
       "description": "Parameters to function"
+    },
+    "parallel": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of chunks to create",
+          "minimum": 1
+        },
+        "flip": {
+          "type": "number",
+          "description": "Flip original batch order",
+          "default": 0.5
+        }
+      },
+      "required": [
+        "count"
+      ]
+    },
+    "prefix": {
+      "type": "string",
+      "description": "Prefix for filename when packing flat.",
+      "minLength": 1,
+      "default": "shard"
     },
     "budget": {
       "type": "string",
@@ -76,6 +121,11 @@
       "type": "string",
       "description": "Shard size of files. Unit either md (million docs), bd (billion docs)",
       "pattern": "^[0-9]+(md|bd)$"
+    },
+    "suffix": {
+      "type": "string",
+      "description": "Suffix on dataset, override global",
+      "minLength": 1
     },
     "rubber": {
       "description": "Fraction of extra amount of data over budget for safety.",
@@ -91,5 +141,6 @@
       ]
     }
   },
+  "additionalProperties": false,
   "unevaluatedProperties": false
 }

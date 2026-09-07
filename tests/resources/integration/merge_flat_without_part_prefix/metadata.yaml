@@ -17,6 +17,6 @@ release:
   default:
     input: source
     pack: flat
-    shard: 10
+    shard: 10d
   shard01:
   shard02:

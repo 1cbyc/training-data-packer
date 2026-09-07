@@ -164,9 +164,11 @@ class TestMetadata(unittest.TestCase):
     def test_get_shard_size_documents(self):
         self.assertEqual(10_000_000_000, get_shard_size_documents({"shard": "10bd"}))
         self.assertEqual(5_000_000, get_shard_size_documents({"shard": "5md"}))
-        self.assertEqual(350, get_shard_size_documents({"shard": "350"}))
+        self.assertEqual(350, get_shard_size_documents({"shard": "350d"}))
         with self.assertRaises(ValueError):
             get_shard_size_documents({"shard": "350tt"})
+        with self.assertRaises(ValueError):
+            get_shard_size_documents({"shard": "350"})
 
     @parameterized.expand(
         [
