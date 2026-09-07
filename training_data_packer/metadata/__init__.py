@@ -6,5 +6,5 @@ from .metadata import (
     get_matching_part,
     get_shard_size_documents,
     get_source_dir,
-    read_metadata,
 )
+from .utils import read_metadata

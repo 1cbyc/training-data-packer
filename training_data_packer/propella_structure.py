@@ -6,7 +6,8 @@ from typing import Any
 
 from loguru import logger
 
-from training_data_packer.metadata.metadata import Metadata, read_metadata
+from training_data_packer.metadata import read_metadata
+from training_data_packer.metadata.metadata import Metadata
 from training_data_packer.processor.propella import SourceToPropellaMapper
 from training_data_packer.storage.propella import get_lookup_fn
 from training_data_packer.utils import metrics

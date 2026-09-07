@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 import yaml
 
+import tests.test_utils.metadata
 from training_data_packer.collect_metrics import main
 from training_data_packer.metadata.metadata import Metadata
 
@@ -18,10 +19,13 @@ class TestCollectMetricsTree(unittest.TestCase):
 
             # Create metadata.yaml
             metadata = Metadata(
-                {
-                    "release": {"default": {"pack": "tree"}, "part1": {}, "part2": {}},
-                    "source": {"part1": {}, "part2": {}},
-                }
+                tests.test_utils.metadata.merge_hierarchy_dicts(
+                    tests.test_utils.metadata.minimal_metadata_dict,
+                    {
+                        "release": {"default": {"pack": "tree"}, "part1": {}, "part2": {}},
+                        "source": {"part1": {}, "part2": {}},
+                    },
+                )
             )
             with open(tmp_path / "metadata.yaml", "w") as f:
                 yaml.dump(metadata.data, f)
