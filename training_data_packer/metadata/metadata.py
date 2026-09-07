@@ -6,6 +6,7 @@ from typing import Any
 import glom
 import yaml
 from loguru import logger
+from yaml import SafeLoader
 
 from training_data_packer.utils.file import change_suffix
 
@@ -69,8 +70,8 @@ def get_shard_size_documents(part_config: dict[str, Any]) -> int:
         return int(shard_size[:-2]) * 1_000_000_000
     if shard_size.endswith("md"):
         return int(shard_size[:-2]) * 1_000_000
-    if shard_size.isdigit():
-        return int(shard_size)
+    if shard_size.endswith("d"):
+        return int(shard_size[:-1])
     raise ValueError(f"Invalid shard prefix {shard_size}")
 
 
@@ -137,8 +138,7 @@ def read_metadata(file_path: Path, log_content: bool = True) -> Metadata:
         logger.info(f"Metadata sha256:{sha256_data}")
         if log_content:
             logger.info(f"Metadata content {file_path}:\n{data}\n")
-        # BaseLoader to guarantee that the YAML parser will return unicode strings
-        metadata = yaml.load(data, Loader=yaml.BaseLoader)
+        metadata = yaml.load(data, Loader=SafeLoader)
         metadata["_internal"] = {"collection_dir": file_path.parent, "sha256": sha256_data}
         return Metadata(metadata)
 

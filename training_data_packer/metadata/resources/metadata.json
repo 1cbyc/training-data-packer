@@ -7,23 +7,41 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Name of dataset"
+      "description": "Name of dataset",
+      "minLength": 1
     },
     "catalogue": {
       "type": "string",
-      "description": "Catalogue of dataset"
+      "description": "Catalogue of dataset",
+      "minLength": 1
+    },
+    "huggingface": {
+      "type": "string",
+      "description": "Huggingface location of dataset",
+      "minLength": 1
+    },
+    "commit": {
+      "type": "string",
+      "description": "Commit used of data",
+      "minLength": 7
     },
     "id": {
       "type": "string",
-      "description": "Field name containing document id field."
+      "description": "Field name containing document id field.",
+      "minLength": 1,
+      "default": "id"
     },
     "text": {
       "type": "string",
-      "description": "Filed name containing the document text field"
+      "description": "Filed name containing the document text field",
+      "minLength": 1,
+      "default": "text"
     },
     "suffix": {
       "type": "string",
-      "description": "Suffix for source data file names."
+      "description": "Suffix for source data file names.",
+      "minLength": 1,
+      "default": ".jsonl.zst"
     },
     "release": {
       "type": "object",
@@ -31,59 +49,92 @@
       "properties": {
         "default": {
           "$ref": "https://https://openeurollm.eu/schemas/part.json",
-          "required": ["input", "annotations", "pack"]
-        },
-        "additionalProperties": {
-          "oneOf": [
-            {
-              "type": "object",
-              "$ref": "https://https://openeurollm.eu/schemas/part.json"
-            },
-            {
-              "type": "string",
-              "maxLength": 0
-            }
-          ],
-          "description": "Parts overriding default object"
+          "required": [
+            "input",
+            "pack"
+          ]
         }
       },
-      "required": ["default"]
+      "required": [
+        "default"
+      ],
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "$ref": "https://https://openeurollm.eu/schemas/part.json"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Parts overriding default object"
+      },
+      "unevaluatedProperties": false
     },
     "sample": {
       "type": "object",
-      "description": "Object describing detail of how release packaging is done.",
+      "description": "Object describing detail of how sampling is done.",
       "properties": {
         "default": {
           "type": "object",
-          "description": "Default values for release parts",
-          "allOf": [{ "$ref": "https://https://openeurollm.eu/schemas/part.json" }],
-          "required": ["input", "annotations", "sample"],
+          "description": "Default values for sample parts",
+          "allOf": [
+            {
+              "$ref": "https://https://openeurollm.eu/schemas/part.json"
+            }
+          ],
+          "required": [
+            "input"
+          ],
           "mask": false,
           "pack": false,
           "scrub": false,
           "shard": false
-        },
-        "additionalProperties": {
-          "oneOf": [
-            {
-              "type": "object",
-              "$ref": "https://https://openeurollm.eu/schemas/part.json"
-            },
-            {
-              "type": "string",
-              "maxLength": 0
-            }
-          ],
-          "description": "Parts overriding default object"
         }
       },
-      "required": ["default"]
+      "required": [
+        "default"
+      ],
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "$ref": "https://https://openeurollm.eu/schemas/part.json"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Parts overriding default object"
+      },
+      "unevaluatedProperties": false
     },
     "source": {
       "type": "object",
       "description": "Object describing details of source data.",
       "properties": {
-        "default": { "$ref": "https://https://openeurollm.eu/schemas/part.json" }
+        "default": {
+          "oneOf": [
+            {
+              "type": "object",
+              "$ref": "https://https://openeurollm.eu/schemas/part.json",
+              "mask": false,
+              "pack": false,
+              "scrub": false,
+              "sample": false,
+              "filter": false,
+              "parallel": false,
+              "prefix": false,
+              "budget": false,
+              "shard": false,
+              "rubber": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
       },
       "additionalProperties": {
         "oneOf": [
@@ -92,18 +143,20 @@
             "$ref": "https://https://openeurollm.eu/schemas/part.json"
           },
           {
-            "type": "string",
-            "maxLength": 0
+            "type": "null"
           }
         ],
         "description": "Parts overriding default object"
-      }
+      },
+      "unevaluatedProperties": false
     },
     "openeurollm": {
       "type": "object",
       "description": "Object describing details of source data adapted for openeurollm.",
-            "properties": {
-        "default": { "$ref": "https://https://openeurollm.eu/schemas/part.json" }
+      "properties": {
+        "default": {
+          "$ref": "https://https://openeurollm.eu/schemas/part.json"
+        }
       },
       "additionalProperties": {
         "oneOf": [
@@ -112,12 +165,12 @@
             "$ref": "https://https://openeurollm.eu/schemas/part.json"
           },
           {
-            "type": "string",
-            "maxLength": 0
+            "type": "null"
           }
         ],
         "description": "Parts overriding default object"
-      }
+      },
+      "unevaluatedProperties": false
     },
     "uuid": {
       "type": "object",
@@ -129,25 +182,30 @@
             "description": "Default values for release parts",
             "input": {
               "type": "string",
-              "description": "Where to read input data from."
+              "description": "Where to read input data from.",
+              "minLength": 1
             }
           },
-          "required": ["input"]
-        },
-        "additionalProperties": {
-          "oneOf": [
-            {
-              "type": "object",
-              "$ref": "https://https://openeurollm.eu/schemas/part.json"
-            },
-            {
-              "type": "string",
-              "maxLength": 0
-            }
+          "required": [
+            "input"
           ],
-          "description": "Parts overriding default object"
+          "additionalProperties": false,
+          "unevaluatedProperties": false
         }
-      }
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "$ref": "https://https://openeurollm.eu/schemas/part.json"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Parts overriding default object"
+      },
+      "unevaluatedProperties": false
     },
     "nemo-curator": {
       "type": "object",
@@ -159,44 +217,120 @@
           "properties": {
             "input": {
               "type": "string",
-              "description": "Where to read input data from."
+              "description": "Where to read input data from.",
+              "minLength": 1
             }
           },
-          "required": ["input"]
-        },
-        "additionalProperties": {
-          "oneOf": [
-            {
-              "type": "object",
-              "$ref": "https://https://openeurollm.eu/schemas/part.json"
-            },
-            {
-              "type": "string",
-              "maxLength": 0
-            }
-          ],
-          "description": "Parts overriding default object"
+          "required": [
+            "input"
+          ]
         }
-      }
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "$ref": "https://https://openeurollm.eu/schemas/part.json"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Parts overriding default object"
+      },
+      "unevaluatedProperties": false
+    },
+    "parallel": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 0,
+              "default": "source_text"
+            },
+            "language": {
+              "type": "string",
+              "minLength": 0,
+              "default": "src_text"
+            }
+          },
+          "required": [
+            "text",
+            "language"
+          ],
+          "additionalProperties": false,
+          "unevaluatedProperties": false
+        },
+        "target": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 0,
+              "default": "target_text"
+            },
+            "language": {
+              "type": "string",
+              "minLength": 0,
+              "default": "tgt_text"
+            }
+          },
+          "required": [
+            "text",
+            "language"
+          ],
+          "additionalProperties": false,
+          "unevaluatedProperties": false
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "additionalProperties": false,
+      "unevaluatedProperties": false
     },
     "propella-4b": {
-      "type": "object",
       "description": "Object describing details of propella annotation addition",
-      "properties": {
-        "hash": {
-          "type": "string",
-          "description": "Method used in propella data for calculate id",
-          "items": [
-            "sha256",
-            "sha256-32"
-          ]
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "hash": {
+              "type": "string",
+              "description": "Method used in propella data for calculate id",
+              "items": [
+                "sha256",
+                "sha256-32"
+              ]
+            },
+            "hash-id": {
+              "type": "string",
+              "description": "Field name used for hashed id.",
+              "default": "hash"
+            }
+          },
+                "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "$ref": "https://https://openeurollm.eu/schemas/part.json"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Parts overriding default object"
+      },
+          "unevaluatedProperties": false
         },
-        "hash-id": {
-          "type": "string",
-          "description": "Field name used for hashed id.",
-          "default": "hash"
+        {
+          "type": "null"
         }
-      }
+      ]
     },
     "openai-privacy-filter": {
       "type": "object",
@@ -208,28 +342,87 @@
           "properties": {
             "input": {
               "type": "string",
-              "description": "Where to read input data from."
+              "description": "Where to read input data from.",
+              "minLength": 1
             }
           },
-          "required": ["input"]
-        },
-        "additionalProperties": {
+          "required": [
+            "input"
+          ],
+          "additionalProperties": false,
+          "unevaluatedProperties": false
+        }
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "$ref": "https://https://openeurollm.eu/schemas/part.json",
+            "additionalProperties": false
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Parts overriding default object"
+      },
+      "unevaluatedProperties": false
+    },
+    "nugget": {
+      "type": "object",
+      "description": "Reorganization",
+      "properties": {
+        "default": {
           "oneOf": [
             {
               "type": "object",
-              "$ref": "https://https://openeurollm.eu/schemas/part.json"
+              "$ref": "https://https://openeurollm.eu/schemas/part.json",
+              "mask": false,
+              "pack": false,
+              "scrub": false,
+              "sample": false,
+              "filter": false,
+              "parallel": false,
+              "prefix": false,
+              "budget": false,
+              "shard": false,
+              "rubber": false,
+              "additionalProperties": false
             },
             {
-              "type": "string",
-              "maxLength": 0
+              "type": "null"
             }
           ],
-          "description": "Parts overriding default object"
+          "additionalProperties": false,
+          "unevaluatedProperties": false
         }
-      }
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "$ref": "https://https://openeurollm.eu/schemas/part.json",
+            "additionalProperties": false,
+            "unevaluatedProperties": false
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Parts overriding default object"
+      },
+      "unevaluatedProperties": false
     }
   },
-  "required": ["name", "id", "text", "suffix", "release", "source"],
-  "patternProperties": { "^_": {"description":  "Fields for internal use"} },
-  "additionalProperties": false
+  "required": [
+    "name",
+    "release"
+  ],
+  "patternProperties": {
+    "^_": {
+      "description": "Fields for internal use"
+    }
+  },
+  "additionalProperties": false,
+  "unevaluatedProperties": false
 }

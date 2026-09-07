@@ -17,8 +17,8 @@ release:
   default:
     input: source
     pack: flat
-    shard: 10
+    shard: 10d
   shard01:
-    prefix: 01_0
+    prefix: "01_0"
   shard02:
-    prefix: 02_0
+    prefix: "02_0"
