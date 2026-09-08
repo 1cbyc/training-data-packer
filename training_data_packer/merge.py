@@ -9,7 +9,6 @@ import zstandard as zstd
 from loguru import logger
 
 from training_data_packer.metadata import (
-    get_all_part_names,
     get_matching_part,
     get_shard_size_documents,
     read_metadata,
@@ -68,7 +67,7 @@ def process(collection_dir: Path, part: None | str = None, workers: int = 1, slu
     if part is not None:
         parts = [part]
     else:
-        parts = get_all_part_names(metadata)
+        parts = metadata.get_all_part_names("release")
     logger.info(f"Found {len(parts)} parts")
 
     pack_method = metadata.get("release.default.pack")
