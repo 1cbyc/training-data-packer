@@ -3,15 +3,19 @@ from pathlib import Path
 from typing import Any
 
 import glom
+import jsonpath_ng
 from loguru import logger
 
 from training_data_packer.utils.file import change_suffix
+from training_data_packer.utils.misc import merge_hierarchy_dicts
 
 
 class Metadata(UserDict):
     def __getitem__(self, key) -> Any:
-        key = key.replace("[", ".").replace("]", "")
-        return glom.glom(self.data, key)
+        value = self.get(key)
+        if value is None:
+            raise KeyError(f"No such key {key}")
+        return value
 
     def __setitem__(self, key, value) -> None:
         key = key.replace("[", ".").replace("]", "")
@@ -21,7 +25,7 @@ class Metadata(UserDict):
         key = key.replace("[", ".").replace("]", "")
         return glom.delete(self.data, key)
 
-    def get(self, key, default=None):
+    def get(self, key: str, default=None):
         """
         Retrieve a specific value from the provided metadata structure using a
         dot-notation key for deep access. It supports array in both the form [i] and .i.
@@ -32,27 +36,58 @@ class Metadata(UserDict):
         :return: The value extracted from the metadata corresponding to the given
                  key, or the default value if the key is not resolved.
         """
-        key = key.replace("[", ".").replace("]", "")
-        return glom.glom(self.data, key, default=default)
+        expr = jsonpath_ng.parse(key)
+        match = expr.find(self.data)
+        if len(match) == 0:
+            return default
+        elif len(match) > 1:
+            raise ValueError(f"{key} return more than one match in metadata.")
+        return match[0].value
 
+    def get_all_part_names(self, section: str) -> list[str]:
+        """
+        Returns all part names from metadata.
+        :param section: Section to start looking for partnames from.
+        :return: List of part names.
+        """
+        reserved_part_names = ["default"]
 
-def get_all_part_names(metadata: Metadata) -> list[str]:
-    """
-    Returns all part names from metadata.
-    :param metadata: Metadata dictionary.
-    :return: List of part names.
-    """
-    reserved_part_names = ["default"]
+        def _get_section_parts(current_section):
+            section_keys = self[current_section].keys()
+            section_parts = set(filter(lambda x: x not in reserved_part_names, section_keys))
+            input_src = self.get(f"{current_section}.default.input")
+            if input_src is not None:
+                return section_parts.union(_get_section_parts(input_src))
+            return section_parts
 
-    def _get_section_parts(section):
-        section_keys = metadata[section].keys()
-        section_parts = set(filter(lambda x: x not in reserved_part_names, section_keys))
-        input_src = metadata.get(f"{section}.default.input")
-        if input_src is not None:
-            return section_parts.union(_get_section_parts(input_src))
-        return section_parts
+        return sorted(_get_section_parts(section))
 
-    return sorted(_get_section_parts(metadata.get("_internal.mode", "source")))
+    def get_part(self, part_path: str) -> dict[str, Any]:
+        """
+        Retrieves a specific part of the data structure based on the given path.
+
+        Parameters:
+            part_path: str
+                A dot-separated string indicating the path to the desired part of the data structure.
+
+        Returns:
+            dict[str, Any]:
+                A dictionary representing the part of the data structure fetched using the provided path,
+                in union with default values for section.
+
+        Raises:
+            ValueError:
+                If the provided path does not include exactly two elements separated by a dot.
+        """
+
+        def _get_path_to_related_default(part_path: str) -> str:
+            default_parser = jsonpath_ng.parse(part_path)
+            default_parser.right = jsonpath_ng.jsonpath.Fields("default")
+            return str(default_parser)
+
+        part = self.get(part_path)
+        default = self.get(_get_path_to_related_default(part_path))
+        return merge_hierarchy_dicts(part, default)
 
 
 def get_shard_size_documents(part_config: dict[str, Any]) -> int:
@@ -110,7 +145,7 @@ def get_matching_part(
         if part in str(src_file_name):
             if section[part] is None or section[part] == "":
                 section[part] = {}
-            part_settings = default_part_config | section[part]
+            part_settings = merge_hierarchy_dicts(section[part], default_part_config)
             logger.debug(f"Using part {part} for file {src_file_name} with settings {part_settings}")
             return part_settings, part
 

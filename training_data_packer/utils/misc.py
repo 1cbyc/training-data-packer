@@ -1,5 +1,6 @@
 import hashlib
 from collections.abc import Callable
+from copy import deepcopy
 
 from iso639 import Lang
 from loguru import logger
@@ -29,3 +30,38 @@ def lang_to_name(lang: str) -> str:
              the input.
     """
     return Lang(lang.split("_")[0]).name
+
+
+def merge_hierarchy_dicts(dict_a, dict_b):
+    """
+    Recursively merges two dictionaries, `dict_a` and `dict_b`, by combining their keys and values.
+    `dict_a`has precedence over `dict_b`.
+
+    Parameters:
+    dict_a: dict
+        The first dictionary to merge.
+
+    dict_b: dict
+        The second dictionary to merge.
+
+    Returns:
+    dict
+        A new dictionary containing the merged result of `dict_a` and `dict_b`.
+
+    Raises:
+    TypeError
+        If either `dict_a` or `dict_b` is not a dictionary.
+    """
+    if isinstance(dict_a, dict) and isinstance(dict_b, dict):
+        a_and_b = set(dict_a).intersection(dict_b)
+        every_key = set(dict_a).union(dict_b)
+        result = {
+            k: merge_hierarchy_dicts(dict_a[k], dict_b[k])
+            if k in a_and_b
+            else deepcopy(dict_a[k] if k in dict_a else dict_b[k])
+            for k in every_key
+        }
+        return result
+    if dict_a is None:
+        return deepcopy(dict_b)
+    return deepcopy(dict_a)

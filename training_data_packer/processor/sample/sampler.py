@@ -8,6 +8,7 @@ from typing import Any
 
 from loguru import logger
 
+from training_data_packer.metadata.defaults import RUBBER_DEFAULT
 from training_data_packer.metadata.metadata import Metadata, get_matching_part
 from training_data_packer.processor.sample import sample_register
 
@@ -122,7 +123,7 @@ def sampler_factory(
         case "full":
             return data_iterator, None
         case "random":
-            rubber = float(part_config.get("rubber", "1.0"))
+            rubber = float(part_config.get("rubber", RUBBER_DEFAULT))
             fraction = min(float(part_config["budget"].strip("%")) / 100 * rubber, 1.0)
             return itertools.filterfalse(lambda x: random.random() > fraction, data_iterator), None
         case "wds+register":

@@ -1,0 +1,2 @@
+RUBBER_DEFAULT = 1.0
+PREFIX_DEFAULT = "shard"
