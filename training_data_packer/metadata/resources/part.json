@@ -27,8 +27,12 @@
       "description": "Document ID to remove",
       "items": {
         "anyOf": [
-          {"type": "string"},
-          {"type": "number"}
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
         ]
       }
     },
