@@ -1,7 +1,7 @@
 from collections.abc import Iterable, Iterator
 from typing import Any
 
-import glom
+import jsonpath_ng
 
 from training_data_packer.metadata import Metadata
 
@@ -11,9 +11,9 @@ class AlignFieldNames:
         self._src_data = src_data
         self._mapper = {}
         if "id" in metadata and metadata["id"] != "id":
-            self._mapper["id"] = metadata["id"]
+            self._mapper["id"] = jsonpath_ng.parse(metadata["id"])
         if "text" in metadata and metadata["text"] != "text":
-            self._mapper["text"] = metadata["text"]
+            self._mapper["text"] = jsonpath_ng.parse(metadata["text"])
 
     def __iter__(self):
         return self
@@ -21,12 +21,9 @@ class AlignFieldNames:
     def __next__(self):
         src_doc = next(self._src_data)
         for field in self._mapper:
-            try:
-                src_doc[field] = glom.glom(src_doc, self._mapper[field])
-                glom.delete(src_doc, self._mapper[field])
-            except glom.PathAccessError as e:
-                if field not in src_doc:
-                    raise e
+            match = self._mapper[field].find(src_doc)
+            src_doc[field] = match[0].value
+            self._mapper[field].filter(lambda d: True, src_doc)
         return src_doc
 
 
