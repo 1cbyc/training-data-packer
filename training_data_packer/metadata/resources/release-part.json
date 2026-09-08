@@ -5,5 +5,5 @@
   "description": "Global schema for an expanded release part",
   "type": "object",
   "$ref": "https://https://openeurollm.eu/schemas/part.json",
-  "required": ["input", "annotations", "mask", "pack", "sample", "shard"]
+  "required": ["input", "pack", "sample", "shard"]
 }

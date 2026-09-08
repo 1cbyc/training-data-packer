@@ -13,6 +13,7 @@ from training_data_packer.metadata import (
     get_shard_size_documents,
     read_metadata,
 )
+from training_data_packer.metadata.defaults import PREFIX_DEFAULT
 from training_data_packer.utils.file import find_files
 from training_data_packer.utils.slurm import get_my_slurm_tasks
 
@@ -102,7 +103,7 @@ def process(collection_dir: Path, part: None | str = None, workers: int = 1, slu
                     files,
                     output_dir if flat_output else output_dir.joinpath(part_name),
                     docs_per_shard,
-                    part_config.get("prefix", "shard"),
+                    part_config.get("prefix", PREFIX_DEFAULT),
                 )
                 jobs.append(job)
             executor.shutdown()
@@ -118,7 +119,7 @@ def process(collection_dir: Path, part: None | str = None, workers: int = 1, slu
                 files,
                 output_dir,
                 docs_per_shard,
-                "shard",
+                PREFIX_DEFAULT,
             )
         else:
             for part_name in task_parts:
@@ -136,7 +137,7 @@ def process(collection_dir: Path, part: None | str = None, workers: int = 1, slu
                     files,
                     output_dir if flat_output else output_dir.joinpath(part_name),
                     docs_per_shard,
-                    part_config.get("prefix", "shard"),
+                    part_config.get("prefix", PREFIX_DEFAULT),
                 )
 
 
