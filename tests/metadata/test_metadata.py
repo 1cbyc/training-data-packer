@@ -188,11 +188,11 @@ class TestMetadata(unittest.TestCase):
                 5,
             ],
             [
-                "array_glom",
-                Metadata({"a": [{"b": 5}, {"b": 7}]}),
-                "a.0.b",
+                "field_with_dot",
+                Metadata({"a": [{"b": 5}, {"b.c": 7}]}),
+                "a[1].'b.c'",
                 17,
-                5,
+                7,
             ],
         ]
     )

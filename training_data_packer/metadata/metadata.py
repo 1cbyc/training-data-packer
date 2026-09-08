@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any
 
 import glom
+import jsonpath_ng
 from loguru import logger
 
 from training_data_packer.utils.file import change_suffix
@@ -11,8 +12,10 @@ from training_data_packer.utils.misc import merge_hierarchy_dicts
 
 class Metadata(UserDict):
     def __getitem__(self, key) -> Any:
-        key = key.replace("[", ".").replace("]", "")
-        return glom.glom(self.data, key)
+        value = self.get(key)
+        if value is None:
+            raise KeyError(f"No such key {key}")
+        return value
 
     def __setitem__(self, key, value) -> None:
         key = key.replace("[", ".").replace("]", "")
@@ -22,7 +25,7 @@ class Metadata(UserDict):
         key = key.replace("[", ".").replace("]", "")
         return glom.delete(self.data, key)
 
-    def get(self, key, default=None):
+    def get(self, key: str, default=None):
         """
         Retrieve a specific value from the provided metadata structure using a
         dot-notation key for deep access. It supports array in both the form [i] and .i.
@@ -33,8 +36,13 @@ class Metadata(UserDict):
         :return: The value extracted from the metadata corresponding to the given
                  key, or the default value if the key is not resolved.
         """
-        key = key.replace("[", ".").replace("]", "")
-        return glom.glom(self.data, key, default=default)
+        expr = jsonpath_ng.parse(key)
+        match = expr.find(self.data)
+        if len(match) == 0:
+            return default
+        elif len(match) > 1:
+            raise ValueError(f"{key} return more than one match in metadata.")
+        return match[0].value
 
     def get_all_part_names(self, section: str) -> list[str]:
         """
@@ -71,11 +79,14 @@ class Metadata(UserDict):
             ValueError:
                 If the provided path does not include exactly two elements separated by a dot.
         """
-        split_path = part_path.split(".")
-        if len(split_path) != 2:
-            raise ValueError(f"Path must contain two elements: {part_path}")
+
+        def _get_path_to_related_default(part_path: str) -> str:
+            default_parser = jsonpath_ng.parse(part_path)
+            default_parser.right = jsonpath_ng.jsonpath.Fields("default")
+            return str(default_parser)
+
         part = self.get(part_path)
-        default = self.get(f"{split_path[0]}.default")
+        default = self.get(_get_path_to_related_default(part_path))
         return merge_hierarchy_dicts(part, default)
 
 
