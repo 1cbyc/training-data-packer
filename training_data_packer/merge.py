@@ -9,11 +9,11 @@ import zstandard as zstd
 from loguru import logger
 
 from training_data_packer.metadata import (
-    get_all_part_names,
     get_matching_part,
     get_shard_size_documents,
     read_metadata,
 )
+from training_data_packer.metadata.defaults import PREFIX_DEFAULT
 from training_data_packer.utils.file import find_files
 from training_data_packer.utils.slurm import get_my_slurm_tasks
 
@@ -68,7 +68,7 @@ def process(collection_dir: Path, part: None | str = None, workers: int = 1, slu
     if part is not None:
         parts = [part]
     else:
-        parts = get_all_part_names(metadata)
+        parts = metadata.get_all_part_names("release")
     logger.info(f"Found {len(parts)} parts")
 
     pack_method = metadata.get("release.default.pack")
@@ -103,7 +103,7 @@ def process(collection_dir: Path, part: None | str = None, workers: int = 1, slu
                     files,
                     output_dir if flat_output else output_dir.joinpath(part_name),
                     docs_per_shard,
-                    part_config.get("prefix", "shard"),
+                    part_config.get("prefix", PREFIX_DEFAULT),
                 )
                 jobs.append(job)
             executor.shutdown()
@@ -119,7 +119,7 @@ def process(collection_dir: Path, part: None | str = None, workers: int = 1, slu
                 files,
                 output_dir,
                 docs_per_shard,
-                "shard",
+                PREFIX_DEFAULT,
             )
         else:
             for part_name in task_parts:
@@ -137,7 +137,7 @@ def process(collection_dir: Path, part: None | str = None, workers: int = 1, slu
                     files,
                     output_dir if flat_output else output_dir.joinpath(part_name),
                     docs_per_shard,
-                    part_config.get("prefix", "shard"),
+                    part_config.get("prefix", PREFIX_DEFAULT),
                 )
 
 

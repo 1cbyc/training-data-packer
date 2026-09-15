@@ -4,7 +4,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from training_data_packer.metadata import get_all_part_names, read_metadata
+from training_data_packer.metadata import read_metadata
 from training_data_packer.utils import metrics
 
 
@@ -50,8 +50,8 @@ def main():
     if metadata_path.exists():
         metadata = read_metadata(metadata_path)
         if metadata.get("release", {}).get("default", {}).get("pack") == "tree":
-            parts = get_all_part_names(metadata)
-            for part in parts:
+            part_names = metadata.get_all_part_names("release")
+            for part in part_names:
                 part_dir = release_raw_dir.joinpath(part)
                 collect_metrics(part_dir)
 

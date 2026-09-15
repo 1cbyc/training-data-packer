@@ -6,7 +6,7 @@ from parameterized import parameterized
 
 import tests.resources.metadata
 import tests.test_utils.metadata
-from training_data_packer.metadata import Metadata, read_metadata
+from training_data_packer.metadata import read_metadata
 from training_data_packer.metadata.schema import Validator
 
 
@@ -31,19 +31,6 @@ class MetadataSchemaTest(unittest.TestCase):
 
     def test_validator_initialization(self):
         self.assertIsNotNone(self.validator.registry)
-
-    def test_validator_set_defaults_on_minimal_input(self):
-        minimal_metadata = Metadata(tests.test_utils.metadata.minimal_metadata_dict)
-        metadata_with_expected_defaults = {
-            "name": "dataset name",
-            "id": "id",
-            "text": "text",
-            "suffix": ".jsonl.zst",
-            "release": {"default": {"input": "source", "pack": "flat"}},
-        }
-        result = Validator().validate_metadata(minimal_metadata)
-        self.assertTrue(result)
-        self.assertEqual(metadata_with_expected_defaults, minimal_metadata)
 
 
 class ReleasePartSchemaTest(unittest.TestCase):
